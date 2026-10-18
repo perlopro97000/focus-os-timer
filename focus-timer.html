@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus OS Timer</title>
+    <style>
+        body {
+            background-color: #191919; /* Notion Dark Mode background */
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .timer-display {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #2F2F2F;
+            color: #ffffff;
+            border: 1px solid #404040;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background-color: #404040;
+        }
+        .btn-start {
+            background-color: #2ea043; /* Subdued green */
+            border-color: #2ea043;
+        }
+        .btn-start:hover {
+            background-color: #3fb950;
+        }
+        .btn-stop {
+            background-color: #da3633; /* Subdued red */
+            border-color: #da3633;
+        }
+        .btn-stop:hover {
+            background-color: #f85149;
+        }
+        .modes {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #8b949e;
+        }
+        .mode-option {
+            cursor: pointer;
+            padding-bottom: 5px;
+        }
+        .mode-option.active {
+            color: #58a6ff; /* Notion Blue accent */
+            border-bottom: 2px solid #58a6ff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="modes">
+        <div class="mode-option active" id="mode-25" onclick="setMode(25, this)">25 min Focus</div>
+        <div class="mode-option" id="mode-45" onclick="setMode(45, this)">45 min Deep Work</div>
+        <div class="mode-option" id="mode-5" onclick="setMode(5, this)">5 min Break</div>
+    </div>
+
+    <div class="timer-display" id="time-display">25:00</div>
+
+    <div class="controls">
+        <button class="btn-start" id="start-btn" onclick="startTimer()">Start</button>
+        <button class="btn-stop" id="stop-btn" onclick="stopTimer()" style="display:none;">Pause</button>
+        <button onclick="resetTimer()">Reset</button>
+    </div>
+
+    <script>
+        let timeLeft = 25 * 60;
+        let timerId = null;
+        let currentMode = 25;
+
+        const display = document.getElementById('time-display');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function setMode(minutes, element) {
+            stopTimer();
+            currentMode = minutes;
+            timeLeft = minutes * 60;
+            updateDisplay();
+            
+            // Update UI
+            document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function startTimer() {
+            if (timerId !== null) return;
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
+            
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    alert(currentMode === 5 ? "Break is over! Ready to focus?" : "Focus session complete! Take a break.");
+                    resetTimer();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerId);
+            timerId = null;
+            startBtn.style.display = 'block';
+            stopBtn.style.display = 'none';
+            startBtn.textContent = 'Resume';
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timeLeft = currentMode * 60;
+            updateDisplay();
+            startBtn.textContent = 'Start';
+        }
+
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
